@@ -1,0 +1,9 @@
+{
+  "name": "SpendWise",
+  "displayName": "SpendWise",
+  "extra": {
+    "eas": {
+      "projectId": "59f62654-13e3-4e56-8790-09d4a990673c"
+    }
+  }
+}
