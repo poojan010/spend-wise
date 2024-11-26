@@ -1,22 +1,28 @@
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '../../navigation/RootNavigator';
+import { useTheme } from '../../theme/ThemeContext';
 import styles from './styles';
 
 type SplashProps = NativeStackScreenProps<RootStackParamList, 'Splash'>;
 
 const Splash: React.FC<SplashProps> = ({ navigation }) => {
+  const { theme } = useTheme();
+  const themedStyles = styles(theme);
+
+  useEffect(() => {
+    // Navigate to Onboarding screen after a delay
+    const timer = setTimeout(() => {
+      navigation.replace('OnboardingGuide');
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Welcome to the App</Text>
-      <Text
-        onPress={() => navigation.navigate('OnboardingGuide')}
-        style={styles.link}
-      >
-        Go to Onboarding
-      </Text>
+    <View style={themedStyles.container}>
+      <Text style={themedStyles.text}>Welcome to the App</Text>
     </View>
   );
 };

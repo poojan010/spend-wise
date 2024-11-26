@@ -1,22 +1,22 @@
 import React from 'react';
-import { Button, Text, View } from 'react-native';
+import { View, Text, Button } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '../../navigation/RootNavigator';
+import { useTheme } from '../../theme/ThemeContext';
 import styles from './styles';
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const Home: React.FC<HomeProps> = ({ navigation }) => {
+  const { theme } = useTheme();
 
+  const themedStyles = styles(theme);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Welcome, User </Text>
-      <Button
-        title="Go to Analysis"
-        onPress={() => navigation.navigate('Analysis')}
-      />
+    <View style={themedStyles.container}>
+      <Text style={themedStyles.text}>Welcome Home, User</Text>
+      <Button title="Go to Analysis" onPress={() => navigation.navigate('Analysis')} />
     </View>
   );
 };
