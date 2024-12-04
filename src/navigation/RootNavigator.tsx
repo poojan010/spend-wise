@@ -22,7 +22,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash" screenOptions={{
+    <Stack.Navigator initialRouteName="Home" screenOptions={{
       animation: 'ios_from_right',
       headerShown: false,
     }}>

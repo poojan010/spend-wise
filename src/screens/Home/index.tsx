@@ -1,22 +1,54 @@
-import React from 'react';
-import { View, Text, Button } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, {useEffect, useState} from 'react';
+import {View, Text, FlatList} from 'react-native';
 
-import { RootStackParamList } from '../../navigation/RootNavigator';
-import { useTheme } from '../../theme/ThemeContext';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+
+import {RootStackParamList} from '../../navigation/RootNavigator';
+
 import styles from './styles';
+import {useTheme} from '../../theme/ThemeContext';
+
+import {fetchSmsMessages} from '../../utils/smsHandler';
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-const Home: React.FC<HomeProps> = ({ navigation }) => {
-  const { theme } = useTheme();
+const Home: React.FC<HomeProps> = ({}) => {
+  const {theme} = useTheme();
 
   const themedStyles = styles(theme);
 
+  const [messages, setMessages] = useState<
+    {address: string; body: string; date: string}[]
+  >([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadMessages = async () => {
+    setLoading(true);
+    const fetchedMessages = await fetchSmsMessages();
+    setMessages(fetchedMessages);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
   return (
     <View style={themedStyles.container}>
-      <Text style={themedStyles.text}>Welcome Home, User</Text>
-      <Button title="Go to Analysis" onPress={() => navigation.navigate('Analysis')} />
+      <FlatList
+        data={messages}
+        renderItem={({item, index}) => {
+          return (
+            <View key={index} style={themedStyles.listItem}>
+              <View style={themedStyles.listItemRow}>
+                <Text style={themedStyles.listItemTitle}>{item.address}</Text>
+                <Text style={themedStyles.listItemDate}>{item.date}</Text>
+              </View>
+              <Text style={themedStyles.listItemText}>{item.body}</Text>
+            </View>
+          );
+        }}
+      />
     </View>
   );
 };
