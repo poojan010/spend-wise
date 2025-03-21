@@ -16,6 +16,10 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      - name: Sleep 20
+        run: |
+          sleep 20
+
       - name: Update Info.plist
         id: update-plist
         run: |
