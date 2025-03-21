@@ -1,0 +1,62 @@
+name: Android Test Distribute
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test
+
+jobs:
+  update-version:
+    name: Update Version Code
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: 🔍 Extract Current Version Info
+        id: current-version
+        run: |
+          FILE="android/app/build.gradle"
+          version_code=$(grep -m1 "versionCode" "$FILE" | grep -oE "[0-9]+")
+          version_name=$(grep -m1 "versionName" "$FILE" | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "VERSION_CODE=$version_code" >> $GITHUB_ENV
+          echo "VERSION_NAME=$version_name" >> $GITHUB_ENV
+
+      - name: 🔧 Increment Version Code
+        run: |
+          # Increment versionCode
+          new_version_code=$((VERSION_CODE + 1))
+
+          # Update build.gradle file
+          sed -i.bak "s/versionCode $VERSION_CODE/versionCode $new_version_code/" android/app/build.gradle
+
+          # Expose new versionCode as an environment variable
+          echo "NEW_VERSION_CODE=$new_version_code" >> $GITHUB_ENV
+
+      - name: ✅ Commit and Push Changes with Retry
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add changes
+          git add android/app/build.gradle
+
+          # Check if there are actual changes before committing
+          if ! git diff --cached --quiet; then
+            git commit -m "Test(Android) - Bump to ${{ env.VERSION_NAME }}(${{ env.NEW_VERSION_CODE }})"
+
+            # Retry push logic in case of conflicts
+            n=0
+            until [ "$n" -ge 3 ]; do
+              git pull --rebase origin test || echo "Skipping rebase due to conflicts."
+              git push origin test && break
+              echo "⚠️ Push failed, retrying ($((n+1))/3)..."
+              n=$((n+1))
+              sleep 2
+            done
+          else
+            echo "✅ No changes detected. Skipping commit."
+          fi
